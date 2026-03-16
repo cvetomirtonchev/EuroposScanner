@@ -1,37 +1,23 @@
 package com.example.europos_scanner.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.europos_scanner.ui.theme.FeriaError
-import com.example.europos_scanner.ui.theme.FeriaSuccess
-import com.example.europos_scanner.ui.theme.GlassCard
-import kotlinx.coroutines.delay
+import com.example.europos_scanner.ui.theme.EuroposScannerTheme
 
 sealed class ScanResultState {
     data class Success(val studentName: String, val message: String = "Ученикът е успешно маркиран!") : ScanResultState()
@@ -46,82 +32,83 @@ fun ResultDialog(
 ) {
     if (result == null) return
 
-    LaunchedEffect(result) {
-        delay(4000)
-        onDismiss()
-    }
+    val isSuccess = result is ScanResultState.Success
+    val accentColor = if (isSuccess) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f)),
-        contentAlignment = Alignment.Center
-    ) {
-        AnimatedVisibility(
-            visible = true,
-            enter = scaleIn(initialScale = 0.8f) + fadeIn(),
-            exit = scaleOut(targetScale = 0.8f) + fadeOut()
-        ) {
-            GlassCard(
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 40.dp)
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(accentColor.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
             ) {
-                val isSuccess = result is ScanResultState.Success
-                val iconColor = if (isSuccess) FeriaSuccess else FeriaError
-                val iconText = if (isSuccess) "✓" else "✗"
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(CircleShape)
-                            .background(iconColor.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = iconText,
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = iconColor
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    when (result) {
-                        is ScanResultState.Success -> {
-                            Text(
-                                text = result.studentName,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = result.message,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.8f),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                        is ScanResultState.Error -> {
-                            Text(
-                                text = result.message,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.White,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
+                Text(
+                    text = if (isSuccess) "\u2714" else "\u2716",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = accentColor
+                )
             }
-        }
+        },
+        title = {
+            when (result) {
+                is ScanResultState.Success -> Text(
+                    text = result.studentName,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                is ScanResultState.Error -> Text(
+                    text = "Грешка",
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        text = {
+            when (result) {
+                is ScanResultState.Success -> Text(
+                    text = result.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+                is ScanResultState.Error -> Text(
+                    text = result.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("OK")
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Preview
+@Composable
+private fun ResultDialogSuccessPreview() {
+    EuroposScannerTheme {
+        ResultDialog(
+            result = ScanResultState.Success(studentName = "Иван Петров"),
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ResultDialogErrorPreview() {
+    EuroposScannerTheme {
+        ResultDialog(
+            result = ScanResultState.Error(message = "Поръчката е вече използвана!"),
+            onDismiss = {}
+        )
     }
 }

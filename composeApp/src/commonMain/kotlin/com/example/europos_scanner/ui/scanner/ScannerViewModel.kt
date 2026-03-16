@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.europos_scanner.data.remote.ApiException
 import com.example.europos_scanner.data.repository.StudentRepository
+import com.example.europos_scanner.domain.session.SessionManager
 import com.example.europos_scanner.ui.components.ScanResultState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ScannerViewModel(private val studentRepository: StudentRepository) : ViewModel() {
+class ScannerViewModel(
+    private val studentRepository: StudentRepository,
+    private val sessionManager: SessionManager
+) : ViewModel() {
 
     private val _state = MutableStateFlow(ScannerState())
     val state: StateFlow<ScannerState> = _state.asStateFlow()
@@ -62,8 +66,12 @@ class ScannerViewModel(private val studentRepository: StudentRepository) : ViewM
                 onSuccess = { students ->
                     _state.update { it.copy(students = students, isLoadingStudents = false) }
                 },
-                onFailure = {
-                    _state.update { it.copy(students = emptyList(), isLoadingStudents = false) }
+                onFailure = { e ->
+                    if (isUnauthorized(e)) {
+                        handleUnauthorized()
+                    } else {
+                        _state.update { it.copy(students = emptyList(), isLoadingStudents = false) }
+                    }
                 }
             )
         }
@@ -106,14 +114,18 @@ class ScannerViewModel(private val studentRepository: StudentRepository) : ViewM
                     }
                 },
                 onFailure = { e ->
-                    val message = when {
-                        e is ApiException && e.code == "ORDER_ITEM_NOT_FOUND" -> "Няма намерена поръчка!"
-                        e is ApiException && e.code == "ORDER_ITEM_ALREADY_USED" -> "Поръчката е вече използвана!"
-                        e is ApiException -> e.message
-                        else -> "Грешка при свързване със сървъра"
-                    }
-                    _state.update {
-                        it.copy(scanResult = ScanResultState.Error(message), isProcessingScan = false)
+                    if (isUnauthorized(e)) {
+                        handleUnauthorized()
+                    } else {
+                        val message = when {
+                            e is ApiException && e.code == "ORDER_ITEM_NOT_FOUND" -> "Няма намерена поръчка!"
+                            e is ApiException && e.code == "ORDER_ITEM_ALREADY_USED" -> "Поръчката е вече използвана!"
+                            e is ApiException -> e.message
+                            else -> "Грешка при свързване със сървъра"
+                        }
+                        _state.update {
+                            it.copy(scanResult = ScanResultState.Error(message), isProcessingScan = false)
+                        }
                     }
                 }
             )
@@ -123,5 +135,13 @@ class ScannerViewModel(private val studentRepository: StudentRepository) : ViewM
     private fun extractNumber(text: String): String {
         val match = Regex("\\d+").find(text) ?: throw IllegalArgumentException("No digits found")
         return match.value
+    }
+
+    private fun isUnauthorized(e: Throwable): Boolean =
+        e is ApiException && (e.code == "UNAUTHORIZED" || e.code == "401")
+
+    private suspend fun handleUnauthorized() {
+        sessionManager.clearToken()
+        _effect.send(ScannerEffect.NavigateToLogin)
     }
 }

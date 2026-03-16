@@ -20,7 +20,6 @@ val FeriaOnSurface = Color(0xFF1B1B1B)
 val FeriaOnError = Color.White
 val FeriaOnSuccess = Color.White
 
-val FeriaSurfaceGlass = Color.White.copy(alpha = 0.25f)
-val FeriaSurfaceGlassGreen = FeriaAccent.copy(alpha = 0.2f)
-val FeriaBorderGlass = Color.White.copy(alpha = 0.4f)
-val FeriaBorderGlassGreen = FeriaSecondary.copy(alpha = 0.3f)
+val FeriaSurface = Color.White
+val FeriaSurfaceVariant = Color(0xFFE8F5E9)
+val FeriaOutline = Color(0xFFC8E6C9)

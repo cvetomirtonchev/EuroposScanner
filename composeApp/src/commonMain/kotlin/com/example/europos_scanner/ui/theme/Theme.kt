@@ -7,13 +7,20 @@ import androidx.compose.runtime.Composable
 private val LightColorScheme = lightColorScheme(
     primary = FeriaPrimary,
     onPrimary = FeriaOnPrimary,
+    primaryContainer = FeriaAccent,
+    onPrimaryContainer = FeriaTextPrimary,
     secondary = FeriaSecondary,
     onSecondary = FeriaOnSecondary,
+    secondaryContainer = FeriaSurfaceVariant,
+    onSecondaryContainer = FeriaTextPrimary,
     tertiary = FeriaAccent,
     background = FeriaBackground,
     onBackground = FeriaOnBackground,
-    surface = FeriaBackground,
+    surface = FeriaSurface,
     onSurface = FeriaOnSurface,
+    surfaceVariant = FeriaSurfaceVariant,
+    onSurfaceVariant = FeriaTextSecondary,
+    outline = FeriaOutline,
     error = FeriaError,
     onError = FeriaOnError
 )
