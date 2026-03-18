@@ -3,6 +3,7 @@ package com.example.europos_scanner.ui.scanner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.europos_scanner.data.remote.ApiException
+import com.example.europos_scanner.data.repository.AuthRepository
 import com.example.europos_scanner.data.repository.StudentRepository
 import com.example.europos_scanner.domain.session.SessionManager
 import com.example.europos_scanner.ui.components.ScanResultState
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class ScannerViewModel(
     private val studentRepository: StudentRepository,
+    private val authRepository: AuthRepository,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
@@ -27,6 +29,7 @@ class ScannerViewModel(
 
     init {
         loadStudents()
+        loadUserDetails()
     }
 
     fun onIntent(intent: ScannerIntent) {
@@ -51,6 +54,7 @@ class ScannerViewModel(
             is ScannerIntent.ToggleManualInput -> _state.update { it.copy(isManualInput = !it.isManualInput) }
             is ScannerIntent.DismissResult -> _state.update { it.copy(scanResult = null) }
             is ScannerIntent.LoadStudents -> loadStudents()
+            is ScannerIntent.Logout -> logout()
         }
     }
 
@@ -129,6 +133,29 @@ class ScannerViewModel(
                     }
                 }
             )
+        }
+    }
+
+    private fun loadUserDetails() {
+        viewModelScope.launch {
+            val result = authRepository.getUserDetails()
+            result.fold(
+                onSuccess = { details ->
+                    _state.update { it.copy(userDetails = details) }
+                },
+                onFailure = { e ->
+                    if (isUnauthorized(e)) {
+                        handleUnauthorized()
+                    }
+                }
+            )
+        }
+    }
+
+    private fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
+            _effect.send(ScannerEffect.NavigateToLogin)
         }
     }
 

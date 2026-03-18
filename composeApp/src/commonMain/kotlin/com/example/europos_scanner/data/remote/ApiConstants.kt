@@ -6,4 +6,5 @@ object ApiConstants {
     const val LOGIN = "/api/auth/login"
     const val STUDENTS = "/api/children/moderator/all"
     const val CHANGE_ORDER_STATUS = "/api/order/moderator/change-status"
+    const val USER_DETAILS = "/api/user/details"
 }

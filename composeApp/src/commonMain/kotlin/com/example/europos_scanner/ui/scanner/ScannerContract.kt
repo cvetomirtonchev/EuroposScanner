@@ -1,6 +1,7 @@
 package com.example.europos_scanner.ui.scanner
 
 import com.example.europos_scanner.data.model.Student
+import com.example.europos_scanner.data.model.UserDetailsResponse
 import com.example.europos_scanner.ui.components.ScanResultState
 
 data class ScannerState(
@@ -12,7 +13,8 @@ data class ScannerState(
     val isManualInput: Boolean = false,
     val manualInputText: String = "",
     val scanResult: ScanResultState? = null,
-    val isProcessingScan: Boolean = false
+    val isProcessingScan: Boolean = false,
+    val userDetails: UserDetailsResponse? = null
 )
 
 sealed class ScannerIntent {
@@ -24,6 +26,7 @@ sealed class ScannerIntent {
     data object ToggleManualInput : ScannerIntent()
     data object DismissResult : ScannerIntent()
     data object LoadStudents : ScannerIntent()
+    data object Logout : ScannerIntent()
 }
 
 sealed class ScannerEffect {
