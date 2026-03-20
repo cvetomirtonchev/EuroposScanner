@@ -6,14 +6,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.europos_scanner.domain.session.SessionManager
+import com.example.europos_scanner.navigation.AllOrdersRoute
 import com.example.europos_scanner.navigation.LoginRoute
 import com.example.europos_scanner.navigation.ScannerRoute
-import com.example.europos_scanner.ui.login.LoginEffect
+import com.example.europos_scanner.navigation.StudentsRoute
 import com.example.europos_scanner.ui.login.LoginScreen
 import com.example.europos_scanner.ui.login.LoginViewModel
+import com.example.europos_scanner.ui.orders.AllOrdersEffect
+import com.example.europos_scanner.ui.orders.AllOrdersScreen
+import com.example.europos_scanner.ui.orders.AllOrdersViewModel
 import com.example.europos_scanner.ui.scanner.ScannerEffect
 import com.example.europos_scanner.ui.scanner.ScannerScreen
 import com.example.europos_scanner.ui.scanner.ScannerViewModel
+import com.example.europos_scanner.ui.students.StudentsEffect
+import com.example.europos_scanner.ui.students.StudentsScreen
+import com.example.europos_scanner.ui.students.StudentsViewModel
 import com.example.europos_scanner.ui.theme.EuroposScannerTheme
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.mp.KoinPlatform.getKoin
@@ -51,11 +58,57 @@ fun App() {
                                     popUpTo(ScannerRoute) { inclusive = true }
                                 }
                             }
+                            ScannerEffect.NavigateToAllOrders -> {
+                                navController.navigate(AllOrdersRoute)
+                            }
+                            ScannerEffect.NavigateToAllStudents -> {
+                                navController.navigate(StudentsRoute)
+                            }
                         }
                     }
                 }
 
                 ScannerScreen(viewModel = viewModel)
+            }
+            composable<StudentsRoute> {
+                val viewModel: StudentsViewModel = koinViewModel()
+
+                LaunchedEffect(Unit) {
+                    viewModel.effect.collect { effect ->
+                        when (effect) {
+                            StudentsEffect.NavigateToLogin -> {
+                                navController.navigate(LoginRoute) {
+                                    popUpTo(ScannerRoute) { inclusive = true }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                StudentsScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable<AllOrdersRoute> {
+                val viewModel: AllOrdersViewModel = koinViewModel()
+
+                LaunchedEffect(Unit) {
+                    viewModel.effect.collect { effect ->
+                        when (effect) {
+                            AllOrdersEffect.NavigateToLogin -> {
+                                navController.navigate(LoginRoute) {
+                                    popUpTo(ScannerRoute) { inclusive = true }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                AllOrdersScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
     }

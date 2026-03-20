@@ -1,11 +1,13 @@
 package com.example.europos_scanner.data.remote
 
 import com.example.europos_scanner.data.model.ErrorResponse
+import com.example.europos_scanner.data.model.GetOrdersResponse
 import com.example.europos_scanner.data.model.LoginRequest
 import com.example.europos_scanner.data.model.OrderStatusRequest
 import com.example.europos_scanner.data.model.OrderStatusResponse
 import com.example.europos_scanner.data.model.StudentListResponse
 import com.example.europos_scanner.data.model.TokenResponse
+import com.example.europos_scanner.data.model.UserDetailsResponse
 import com.example.europos_scanner.domain.session.SessionManager
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -51,14 +53,53 @@ class ApiService(private val sessionManager: SessionManager) {
         return handleResponse(response) { response.body<TokenResponse>() }
     }
 
-    suspend fun getStudents(grade: String, className: String): StudentListResponse {
+    suspend fun getStudents(grade: String?, className: String?): StudentListResponse {
         val token = sessionManager.token ?: throw ApiException("UNAUTHORIZED", "Not logged in")
         val response = client.get("${ApiConstants.BASE_URL}${ApiConstants.STUDENTS}") {
             header("Authorization", token)
-            parameter("grade", grade)
-            parameter("className", className)
+            grade?.let {
+                parameter("grade", grade)
+            }
+            className?.let {
+                parameter("className", className)
+            }
         }
         return handleResponse(response) { response.body<StudentListResponse>() }
+    }
+
+    suspend fun getOrders(
+        from: String?,
+        to: String?,
+        status: String?,
+        childrenId: Long?,
+        name: String?,
+        grade: Int?,
+        className: String?,
+        page: Int,
+        size: Int
+    ): GetOrdersResponse {
+        val token = sessionManager.token ?: throw ApiException("UNAUTHORIZED", "Not logged in")
+        val response = client.get("${ApiConstants.BASE_URL}${ApiConstants.ORDERS}") {
+            header("Authorization", token)
+            from?.let { parameter("from", it) }
+            to?.let { parameter("to", it) }
+            status?.let { parameter("status", it) }
+            childrenId?.let { parameter("childrenId", it) }
+            name?.let { parameter("name", it) }
+            grade?.let { parameter("grade", it) }
+            className?.let { parameter("className", it) }
+            parameter("page", page)
+            parameter("size", size)
+        }
+        return handleResponse(response) { response.body<GetOrdersResponse>() }
+    }
+
+    suspend fun getUserDetails(): UserDetailsResponse {
+        val token = sessionManager.token ?: throw ApiException("UNAUTHORIZED", "Not logged in")
+        val response = client.get("${ApiConstants.BASE_URL}${ApiConstants.USER_DETAILS}") {
+            header("Authorization", token)
+        }
+        return handleResponse(response) { response.body<UserDetailsResponse>() }
     }
 
     suspend fun changeOrderStatus(request: OrderStatusRequest): OrderStatusResponse {

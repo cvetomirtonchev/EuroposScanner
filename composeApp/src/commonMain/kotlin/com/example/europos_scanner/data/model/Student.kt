@@ -7,7 +7,7 @@ data class Student(
     val id: Int,
     val firstName: String,
     val lastName: String,
-    val grade: String,
+    val grade: Int,
     val className: String
 ) {
     val fullName: String get() = "$firstName $lastName"

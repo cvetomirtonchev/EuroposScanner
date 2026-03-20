@@ -64,6 +64,7 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
 
             implementation(libs.multiplatform.settings)
             implementation(libs.multiplatform.settings.no.arg)

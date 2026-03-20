@@ -1,5 +1,6 @@
 package com.example.europos_scanner.ui.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,19 +36,20 @@ fun StudentList(
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Checkbox(
-                    checked = isScanned,
-                    onCheckedChange = null
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = student.fullName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (isScanned)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurface
-                )
+                Card {
+                    Box(
+                        modifier = Modifier.padding( 8.dp).fillMaxWidth()
+                    ) {
+                        Text(
+                            text = student.fullName,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (isScanned)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
             }
         }
     }
@@ -58,10 +61,34 @@ private fun StudentListPreview() {
     EuroposScannerTheme {
         StudentList(
             students = listOf(
-                Student(id = 1, firstName = "Иван", lastName = "Петров", grade = "5", className = "А"),
-                Student(id = 2, firstName = "Мария", lastName = "Иванова", grade = "5", className = "А"),
-                Student(id = 3, firstName = "Георги", lastName = "Стоянов", grade = "5", className = "А"),
-                Student(id = 4, firstName = "Елена", lastName = "Димитрова", grade = "5", className = "А"),
+                Student(
+                    id = 1,
+                    firstName = "Иван",
+                    lastName = "Петров",
+                    grade = 5,
+                    className = "А"
+                ),
+                Student(
+                    id = 2,
+                    firstName = "Мария",
+                    lastName = "Иванова",
+                    grade = 5,
+                    className = "А"
+                ),
+                Student(
+                    id = 3,
+                    firstName = "Георги",
+                    lastName = "Стоянов",
+                    grade = 5,
+                    className = "А"
+                ),
+                Student(
+                    id = 4,
+                    firstName = "Елена",
+                    lastName = "Димитрова",
+                    grade = 5,
+                    className = "А"
+                ),
             ),
             scannedIds = setOf(1, 3),
             modifier = Modifier.height(300.dp)

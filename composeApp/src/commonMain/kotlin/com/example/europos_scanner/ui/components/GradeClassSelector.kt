@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.europos_scanner.ui.theme.EuroposScannerTheme
 
 val GRADES = (1..12).map { "$it Клас" }
-val CLASS_SECTIONS = listOf("А", "Б", "В", "Г", "Д", "Е", "Ж", "З")
+val CLASS_SECTIONS = listOf("ВСИЧКИ","А", "Б", "В", "Г", "Д", "Е", "Ж", "З")
 
 @Composable
 fun GradeClassSelector(
