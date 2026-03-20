@@ -59,12 +59,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.europos_scanner.data.model.CityResponse
+import com.example.europos_scanner.data.model.LinkedFacilitiesResponse
 import com.example.europos_scanner.data.model.OrderedItemResponse
+import com.example.europos_scanner.data.model.SchoolResponse
 import com.example.europos_scanner.data.model.UserDetailsResponse
 import com.example.europos_scanner.scanner.CameraPreview
 import com.example.europos_scanner.scanner.rememberCameraPermissionState
 import com.example.europos_scanner.ui.components.ResultDialog
+import com.example.europos_scanner.ui.theme.EuroposScannerTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -169,7 +174,7 @@ fun ScannerContent(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                     ) {
                         Text(
-                            text = "Моля, сканирайте купон на дете",
+                            text = "Моля, сканирайте QR код",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.weight(1f)
@@ -479,6 +484,56 @@ private fun CameraOffPlaceholder() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+private val sampleUserDetails = UserDetailsResponse(
+    id = 2,
+    email = "cvetomirtonchev@gmail.com",
+    username = "tsvetomir",
+    name = "Tsvetomir",
+    verified = true,
+    linkedFacilities = LinkedFacilitiesResponse(
+        id = 4,
+        school = SchoolResponse(
+            id = 4,
+            name = "НУ \"Кирил и Методий\"",
+            city = CityResponse(id = 5, name = "Долни Дъбник")
+        )
+    )
+)
+
+@Preview
+@Composable
+private fun ScannerContentPreview() {
+    EuroposScannerTheme {
+        ScannerContent(
+            state = ScannerState(
+                orders = emptyList(),
+                scannedIds = setOf(1, 3),
+                userDetails = sampleUserDetails
+            ),
+            onIntent = {},
+            cameraSlot = {  }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ScannerContentManualInputPreview() {
+    EuroposScannerTheme {
+        ScannerContent(
+            state = ScannerState(
+                orders = emptyList(),
+                scannedIds = setOf(1),
+                isManualInput = true,
+                manualInputText = "12345",
+                userDetails = sampleUserDetails
+            ),
+            onIntent = {},
+            cameraSlot = {  }
+        )
     }
 }
 

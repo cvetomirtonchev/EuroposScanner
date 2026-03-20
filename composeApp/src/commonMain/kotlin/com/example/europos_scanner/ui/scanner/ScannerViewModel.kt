@@ -169,6 +169,13 @@ class ScannerViewModel(
         }
     }
 
+    private fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
+            _effect.send(ScannerEffect.NavigateToLogin)
+        }
+    }
+
     private fun loadUserDetails() {
         viewModelScope.launch {
             val result = authRepository.getUserDetails()
@@ -182,13 +189,6 @@ class ScannerViewModel(
                     }
                 }
             )
-        }
-    }
-
-    private fun logout() {
-        viewModelScope.launch {
-            authRepository.logout()
-            _effect.send(ScannerEffect.NavigateToLogin)
         }
     }
 
