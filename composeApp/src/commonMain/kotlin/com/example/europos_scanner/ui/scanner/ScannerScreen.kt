@@ -174,11 +174,17 @@ fun ScannerContent(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                     ) {
                         Text(
-                            text = "Моля, сканирайте QR код",
+                            text = "Сканирайте QR код",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.weight(1f)
                         )
+                        Text(
+                            text = "Камера",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = state.isCameraOn,
                             onCheckedChange = { onIntent(ScannerIntent.ToggleCamera) }

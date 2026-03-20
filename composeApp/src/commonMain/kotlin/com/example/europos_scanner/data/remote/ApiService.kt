@@ -4,7 +4,7 @@ import com.example.europos_scanner.data.model.ErrorResponse
 import com.example.europos_scanner.data.model.GetOrdersResponse
 import com.example.europos_scanner.data.model.LoginRequest
 import com.example.europos_scanner.data.model.OrderStatusRequest
-import com.example.europos_scanner.data.model.OrderStatusResponse
+import com.example.europos_scanner.data.model.OrderedItemResponse
 import com.example.europos_scanner.data.model.StudentListResponse
 import com.example.europos_scanner.data.model.TokenResponse
 import com.example.europos_scanner.data.model.UserDetailsResponse
@@ -102,14 +102,14 @@ class ApiService(private val sessionManager: SessionManager) {
         return handleResponse(response) { response.body<UserDetailsResponse>() }
     }
 
-    suspend fun changeOrderStatus(request: OrderStatusRequest): OrderStatusResponse {
+    suspend fun changeOrderStatus(request: OrderStatusRequest): OrderedItemResponse {
         val token = sessionManager.token ?: throw ApiException("UNAUTHORIZED", "Not logged in")
         val response = client.put("${ApiConstants.BASE_URL}${ApiConstants.CHANGE_ORDER_STATUS}") {
             header("Authorization", token)
             contentType(ContentType.Application.Json)
             setBody(request)
         }
-        return handleResponse(response) { response.body<OrderStatusResponse>() }
+        return handleResponse(response) { response.body<OrderedItemResponse>() }
     }
 
     private suspend fun <T> handleResponse(

@@ -106,7 +106,7 @@ private class BarcodeMetadataDelegate(
 ) : NSObject(), AVCaptureMetadataOutputObjectsDelegateProtocol {
 
     private var lastScanTime = 0.0
-    private val throttleIntervalSec = 1.5
+    private val throttleIntervalSec = 3.0
 
     override fun captureOutput(
         output: AVCaptureOutput,
@@ -115,8 +115,9 @@ private class BarcodeMetadataDelegate(
     ) {
         if (didOutputMetadataObjects.isEmpty()) return
 
-        val metadataObject = didOutputMetadataObjects.firstOrNull() as? AVMetadataMachineReadableCodeObject
-            ?: return
+        val metadataObject =
+            didOutputMetadataObjects.firstOrNull() as? AVMetadataMachineReadableCodeObject
+                ?: return
         val value = metadataObject.stringValue ?: return
 
         val now = NSDate().timeIntervalSince1970

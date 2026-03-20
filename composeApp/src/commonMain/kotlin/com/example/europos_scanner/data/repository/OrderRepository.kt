@@ -1,6 +1,8 @@
 package com.example.europos_scanner.data.repository
 
 import com.example.europos_scanner.data.model.GetOrdersResponse
+import com.example.europos_scanner.data.model.OrderStatusRequest
+import com.example.europos_scanner.data.model.OrderedItemResponse
 import com.example.europos_scanner.data.remote.ApiService
 
 class OrderRepository(private val apiService: ApiService) {
@@ -28,6 +30,15 @@ class OrderRepository(private val apiService: ApiService) {
                 page = page,
                 size = size
             )
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun changeOrderStatus(childrenId: Int): Result<OrderedItemResponse> {
+        return try {
+            val response = apiService.changeOrderStatus(OrderStatusRequest(childrenId))
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)

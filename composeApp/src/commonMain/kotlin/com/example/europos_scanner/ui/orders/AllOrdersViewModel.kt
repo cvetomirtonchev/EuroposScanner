@@ -2,7 +2,6 @@ package com.example.europos_scanner.ui.orders
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.europos_scanner.data.model.OrderedItemResponse
 import com.example.europos_scanner.data.remote.ApiException
 import com.example.europos_scanner.data.repository.OrderRepository
 import com.example.europos_scanner.domain.session.SessionManager
@@ -13,9 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 
 class AllOrdersViewModel(
     private val orderRepository: OrderRepository,
@@ -69,7 +65,8 @@ class AllOrdersViewModel(
             result.fold(
                 onSuccess = { response ->
                     _state.update { current ->
-                        val merged = if (page == 0) response.orders else current.orders + response.orders
+                        val merged =
+                            if (page == 0) response.orders else current.orders + response.orders
                         current.copy(
                             orders = merged,
                             isLoading = false,

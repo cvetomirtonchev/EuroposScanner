@@ -8,6 +8,8 @@ import androidx.compose.runtime.setValue
 import platform.AVFoundation.AVAuthorizationStatusAuthorized
 import platform.AVFoundation.AVCaptureDevice
 import platform.AVFoundation.AVMediaTypeVideo
+import platform.AVFoundation.authorizationStatusForMediaType
+import platform.AVFoundation.requestAccessForMediaType
 import platform.darwin.dispatch_async
 import platform.darwin.dispatch_get_main_queue
 

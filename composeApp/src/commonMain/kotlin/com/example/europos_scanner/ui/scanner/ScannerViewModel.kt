@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.europos_scanner.data.remote.ApiException
 import com.example.europos_scanner.data.repository.AuthRepository
 import com.example.europos_scanner.data.repository.OrderRepository
-import com.example.europos_scanner.data.repository.StudentRepository
 import com.example.europos_scanner.domain.session.SessionManager
 import com.example.europos_scanner.ui.components.ScanResultState
 import kotlinx.coroutines.channels.Channel
@@ -17,7 +16,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ScannerViewModel(
-    private val studentRepository: StudentRepository,
     private val orderRepository: OrderRepository,
     private val authRepository: AuthRepository,
     private val sessionManager: SessionManager
@@ -30,7 +28,7 @@ class ScannerViewModel(
     val effect = _effect.receiveAsFlow()
 
     init {
-        loadOrders(page = 0)
+        loadUsedOrders(page = 0)
         loadUserDetails()
     }
 
@@ -52,7 +50,7 @@ class ScannerViewModel(
             is ScannerIntent.LoadMoreOrders -> {
                 val current = _state.value
                 if (!current.isLoadingOrders && current.ordersCurrentPage + 1 < current.ordersTotalPages) {
-                    loadOrders(page = current.ordersCurrentPage + 1)
+                    loadUsedOrders(page = current.ordersCurrentPage + 1)
                 }
             }
 
@@ -68,7 +66,7 @@ class ScannerViewModel(
         }
     }
 
-    private fun loadOrders(page: Int) {
+    private fun loadUsedOrders(page: Int) {
         viewModelScope.launch {
             _state.update { it.copy(isLoadingOrders = true) }
             val result = orderRepository.getOrders(
@@ -124,20 +122,20 @@ class ScannerViewModel(
 
         viewModelScope.launch {
             _state.update { it.copy(isProcessingScan = true) }
-            val result = studentRepository.changeOrderStatus(childrenId)
+            val result = orderRepository.changeOrderStatus(childrenId)
             result.fold(
                 onSuccess = { response ->
-                    if (response.isUsed) {
+                    if (response.status == "USED") {
                         _state.update {
                             it.copy(
                                 scanResult = ScanResultState.Success(
-                                    studentName = response.childrenResponse.name
+                                    studentName = "${response.childrenResponse?.firstName} ${response.childrenResponse?.lastName}"
                                 ),
                                 scannedIds = it.scannedIds + childrenId,
                                 isProcessingScan = false
                             )
                         }
-                        loadOrders(page = 0)
+                        loadUsedOrders(page = 0)
                     } else {
                         _state.update {
                             it.copy(
@@ -151,10 +149,10 @@ class ScannerViewModel(
                     if (isUnauthorized(e)) {
                         handleUnauthorized()
                     } else {
-                        val message = when {
-                            e is ApiException && e.code == "ORDER_ITEM_NOT_FOUND" -> "Няма намерена поръчка!"
-                            e is ApiException && e.code == "ORDER_ITEM_ALREADY_USED" -> "Поръчката е вече използвана!"
-                            e is ApiException -> e.message
+                        val message = when (e) {
+                            is ApiException if e.code == "ORDER_ITEM_NOT_FOUND" -> "Няма намерена поръчка!"
+                            is ApiException if e.code == "ORDER_ITEM_ALREADY_USED" -> "Поръчката е вече маркирана!"
+                            is ApiException -> e.message
                             else -> "Грешка при свързване със сървъра"
                         }
                         _state.update {
