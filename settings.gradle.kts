@@ -1,4 +1,5 @@
-rootProject.name = "EuroposScanner"
+// Gradle root name must not contain '.' (type-safe project accessors). App ID remains bg.europos_scanner.
+rootProject.name = "bg_europos_scanner"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

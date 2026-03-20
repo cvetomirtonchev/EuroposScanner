@@ -76,11 +76,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.example.europos_scanner"
+    namespace = "bg.europos_scanner"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.example.europos_scanner"
+        applicationId = "bg.europos_scanner"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
