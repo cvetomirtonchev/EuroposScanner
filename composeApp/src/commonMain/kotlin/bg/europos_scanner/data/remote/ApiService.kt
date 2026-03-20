@@ -75,6 +75,7 @@ class ApiService(private val sessionManager: SessionManager) {
         name: String?,
         grade: Int?,
         className: String?,
+        orderBy: String?,
         page: Int,
         size: Int
     ): GetOrdersResponse {
@@ -88,6 +89,7 @@ class ApiService(private val sessionManager: SessionManager) {
             name?.let { parameter("name", it) }
             grade?.let { parameter("grade", it) }
             className?.let { parameter("className", it) }
+            orderBy?.let { parameter("orderBy", it) }
             parameter("page", page)
             parameter("size", size)
         }

@@ -59,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import bg.europos_scanner.data.model.CityResponse
@@ -146,7 +147,7 @@ fun ScannerContent(
             containerColor = MaterialTheme.colorScheme.background,
             topBar = {
                 TopAppBar(
-                    title = { Text("Europos Scanner") },
+                    title = { Text("Europos Скенер") },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
@@ -278,6 +279,7 @@ fun ScannerContent(
                         } else {
                             OrdersList(
                                 orders = state.orders,
+                                ordersScrollToTopEpoch = state.ordersScrollToTopEpoch,
                                 isLoadingMore = state.isLoadingOrders,
                                 onLoadMore = { onIntent(ScannerIntent.LoadMoreOrders) },
                                 modifier = Modifier.fillMaxSize()
@@ -298,11 +300,18 @@ fun ScannerContent(
 @Composable
 private fun OrdersList(
     orders: List<OrderedItemResponse>,
+    ordersScrollToTopEpoch: Long,
     isLoadingMore: Boolean,
     onLoadMore: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
+
+    LaunchedEffect(ordersScrollToTopEpoch) {
+        if (ordersScrollToTopEpoch > 0) {
+            listState.scrollToItem(0)
+        }
+    }
 
     val reachedEnd by remember {
         derivedStateOf {
@@ -339,10 +348,11 @@ private fun OrdersList(
                     }
                 }
                 Text(
-                    text = order.status,
+                    text = formatScannerTakenAt(order.statusUpdatedAt) ?: "Взета",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.End
                 )
             }
             if (order != orders.last()) {

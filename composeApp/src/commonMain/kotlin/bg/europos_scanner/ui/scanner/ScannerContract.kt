@@ -10,6 +10,7 @@ data class ScannerState(
     val ordersCurrentPage: Int = 0,
     val ordersTotalPages: Int = 0,
     val ordersTotalElements: Long = 0,
+    val ordersScrollToTopEpoch: Long = 0,
     val scannedIds: Set<Int> = emptySet(),
     val isCameraOn: Boolean = false,
     val isManualInput: Boolean = false,

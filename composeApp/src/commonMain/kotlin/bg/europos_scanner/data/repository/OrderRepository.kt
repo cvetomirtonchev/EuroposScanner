@@ -8,13 +8,14 @@ import bg.europos_scanner.data.remote.ApiService
 class OrderRepository(private val apiService: ApiService) {
 
     suspend fun getOrders(
-        from: String?,
-        to: String?,
-        status: String?,
-        childrenId: Long?,
-        name: String?,
-        grade: Int?,
-        className: String?,
+        from: String? = null,
+        to: String? = null,
+        status: String? = null,
+        childrenId: Long? = null,
+        name: String? = null,
+        grade: Int? = null,
+        className: String? = null,
+        orderBy: String? = null,
         page: Int,
         size: Int
     ): Result<GetOrdersResponse> {
@@ -27,6 +28,7 @@ class OrderRepository(private val apiService: ApiService) {
                 name = name,
                 grade = grade,
                 className = className,
+                orderBy = orderBy,
                 page = page,
                 size = size
             )

@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import bg.europos_scanner.data.model.OrderedItemResponse
+import bg.europos_scanner.data.model.OrderedItemStatus
 
 private val STATUS_OPTIONS = listOf("", "NOT_USED", "USED")
 private val STATUS_LABELS = listOf("Всички", "Неизползвани", "Използвани")
@@ -338,11 +339,7 @@ private fun OrdersListContent(
                     }
                     if (order.childrenResponse != null) {
                         val info = buildString {
-                            order.childrenResponse.grade?.let { append("${it} клас") }
-                            order.childrenResponse.className?.let {
-                                if (isNotEmpty()) append(" ")
-                                append(it)
-                            }
+                            order.childrenResponse.grade?.let { append("${it} ${order.childrenResponse.className} клас") }
                         }
                         if (info.isNotEmpty()) {
                             Text(
@@ -354,15 +351,17 @@ private fun OrdersListContent(
                     }
                 }
                 val statusColor = when (order.status) {
-                    "USED" -> MaterialTheme.colorScheme.primary
-                    "NOT_USED" -> MaterialTheme.colorScheme.error
+                    OrderedItemStatus.USED -> MaterialTheme.colorScheme.primary
+                    OrderedItemStatus.NOT_USED -> MaterialTheme.colorScheme.error
                     else -> MaterialTheme.colorScheme.onSurfaceVariant
                 }
                 Text(
                     text = when (order.status) {
-                        "USED" -> "Използвана"
-                        "NOT_USED" -> "Неизползвана"
-                        else -> order.status
+                        OrderedItemStatus.USED -> "Използвана"
+                        OrderedItemStatus.NOT_USED -> "Неизползвана"
+                        OrderedItemStatus.PENDING_PAYMENT -> "Чака плащане"
+                        OrderedItemStatus.REFUNDED -> "Възстановена"
+                        OrderedItemStatus.UNKNOWN -> "Неизвестен"
                     },
                     style = MaterialTheme.typography.labelSmall,
                     color = statusColor,

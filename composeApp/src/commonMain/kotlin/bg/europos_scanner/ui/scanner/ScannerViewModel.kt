@@ -2,6 +2,8 @@ package bg.europos_scanner.ui.scanner
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.europos_scanner.data.model.OrderedBy
+import bg.europos_scanner.data.model.OrderedItemStatus
 import bg.europos_scanner.data.remote.ApiException
 import bg.europos_scanner.data.repository.AuthRepository
 import bg.europos_scanner.data.repository.OrderRepository
@@ -77,6 +79,7 @@ class ScannerViewModel(
                 name = null,
                 grade = null,
                 className = null,
+                orderBy = OrderedBy.LATEST_UPDATE.name,
                 page = page,
                 size = 20
             )
@@ -93,7 +96,13 @@ class ScannerViewModel(
                             isLoadingOrders = false,
                             ordersCurrentPage = response.pageMeta.currentPage,
                             ordersTotalPages = response.pageMeta.pages,
-                            ordersTotalElements = response.pageMeta.totalElements
+                            ordersTotalElements = response.pageMeta.totalElements,
+                            ordersScrollToTopEpoch =
+                                if (page == 0) {
+                                    current.ordersScrollToTopEpoch + 1
+                                } else {
+                                    current.ordersScrollToTopEpoch
+                                }
                         )
                     }
                 },
@@ -125,7 +134,7 @@ class ScannerViewModel(
             val result = orderRepository.changeOrderStatus(childrenId)
             result.fold(
                 onSuccess = { response ->
-                    if (response.status == "USED") {
+                    if (response.status == OrderedItemStatus.USED) {
                         _state.update {
                             it.copy(
                                 scanResult = ScanResultState.Success(
@@ -139,7 +148,7 @@ class ScannerViewModel(
                     } else {
                         _state.update {
                             it.copy(
-                                scanResult = ScanResultState.Error("Неочакван статус: ${response.status}"),
+                                scanResult = ScanResultState.Error("Неочакван статус: ${response.status.name}"),
                                 isProcessingScan = false
                             )
                         }

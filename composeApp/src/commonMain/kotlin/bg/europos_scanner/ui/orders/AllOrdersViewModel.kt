@@ -59,6 +59,7 @@ class AllOrdersViewModel(
                 name = s.filterName.ifBlank { null },
                 grade = gradeInt,
                 className = s.filterClassName.ifBlank { null },
+                orderBy = null,
                 page = page,
                 size = 20
             )
