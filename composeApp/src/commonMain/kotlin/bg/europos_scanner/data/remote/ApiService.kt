@@ -56,7 +56,7 @@ class ApiService(private val sessionManager: SessionManager) {
     suspend fun getStudents(grade: String?, className: String?): StudentListResponse {
         val token = sessionManager.token ?: throw ApiException("UNAUTHORIZED", "Not logged in")
         val response = client.get("${ApiConstants.BASE_URL}${ApiConstants.STUDENTS}") {
-            header("Authorization", token)
+            header("Authorization", "Bearer $token")
             grade?.let {
                 parameter("grade", grade)
             }

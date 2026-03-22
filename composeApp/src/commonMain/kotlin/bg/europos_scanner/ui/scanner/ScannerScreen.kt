@@ -332,7 +332,7 @@ private fun OrdersList(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(2.6f)) {
                     Text(
                         text = order.childName,
                         style = MaterialTheme.typography.bodyMedium,
@@ -347,8 +347,12 @@ private fun OrdersList(
                         )
                     }
                 }
+                val takenAt = formatScannerTakenAt(order.statusUpdatedAt)?.let {
+                    "Взета на: $it"
+                } ?: "Взета"
                 Text(
-                    text = formatScannerTakenAt(order.statusUpdatedAt) ?: "Взета",
+                    modifier = Modifier.weight(1f),
+                    text = takenAt,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,

@@ -46,9 +46,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import bg.europos_scanner.data.model.OrderChildrenResponse
 import bg.europos_scanner.data.model.OrderedItemResponse
 import bg.europos_scanner.data.model.OrderedItemStatus
+import bg.europos_scanner.ui.scanner.formatScannerTakenAt
+import bg.europos_scanner.ui.theme.EuroposScannerTheme
 
 private val STATUS_OPTIONS = listOf("", "NOT_USED", "USED")
 private val STATUS_LABELS = listOf("Всички", "Неизползвани", "Използвани")
@@ -64,7 +70,22 @@ fun AllOrdersScreen(
     onBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-    var showFilters by remember { mutableStateOf(false) }
+    AllOrdersContent(
+        state = state,
+        onIntent = viewModel::onIntent,
+        onBack = onBack
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AllOrdersContent(
+    state: AllOrdersState,
+    onIntent: (AllOrdersIntent) -> Unit,
+    onBack: () -> Unit,
+    initialShowFilters: Boolean = false
+) {
+    var showFilters by remember { mutableStateOf(initialShowFilters) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -105,7 +126,7 @@ fun AllOrdersScreen(
             if (showFilters) {
                 FiltersSection(
                     state = state,
-                    onIntent = viewModel::onIntent
+                    onIntent = onIntent
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -136,7 +157,7 @@ fun AllOrdersScreen(
                     OrdersListContent(
                         orders = state.orders,
                         isLoadingMore = state.isLoading,
-                        onLoadMore = { viewModel.onIntent(AllOrdersIntent.LoadMore) },
+                        onLoadMore = { onIntent(AllOrdersIntent.LoadMore) },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -313,60 +334,18 @@ private fun OrdersListContent(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = order.childName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Row {
-                        if (order.menuName != null) {
-                            Text(
-                                text = order.menuName,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        if (order.forDate != null) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = order.forDate,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    if (order.childrenResponse != null) {
-                        val info = buildString {
-                            order.childrenResponse.grade?.let { append("${it} ${order.childrenResponse.className} клас") }
-                        }
-                        if (info.isNotEmpty()) {
-                            Text(
-                                text = info,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
+                Column(modifier = Modifier.weight(2.5f)) {
+                    ChildrenRow(order)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    MenuRow(order)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    DateRow(order)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    ModifiedAtRow(order)
                 }
-                val statusColor = when (order.status) {
-                    OrderedItemStatus.USED -> MaterialTheme.colorScheme.primary
-                    OrderedItemStatus.NOT_USED -> MaterialTheme.colorScheme.error
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                Column(modifier = Modifier.weight(1f).fillMaxSize()) {
+                    OrderStatusRow(order)
                 }
-                Text(
-                    text = when (order.status) {
-                        OrderedItemStatus.USED -> "Използвана"
-                        OrderedItemStatus.NOT_USED -> "Неизползвана"
-                        OrderedItemStatus.PENDING_PAYMENT -> "Чака плащане"
-                        OrderedItemStatus.REFUNDED -> "Възстановена"
-                        OrderedItemStatus.UNKNOWN -> "Неизвестен"
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = statusColor,
-                    fontWeight = FontWeight.Bold
-                )
             }
             if (order != orders.last()) {
                 HorizontalDivider(
@@ -385,5 +364,200 @@ private fun OrdersListContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ChildrenRow(order: OrderedItemResponse) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = order.childName,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        if (order.childrenResponse != null) {
+            val info = buildString {
+                order.childrenResponse.grade.let { append("${it}${order.childrenResponse.className} клас") }
+            }
+            if (info.isNotEmpty()) {
+                Text(
+                    text = info,
+                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MenuRow(order: OrderedItemResponse) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "Меню: ",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = order.menuName ?: "Няма",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun DateRow(order: OrderedItemResponse) {
+    if (order.forDate != null) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "За дата: ",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = order.forDate,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun OrderStatusRow(order: OrderedItemResponse) {
+    val statusColor = when (order.status) {
+        OrderedItemStatus.USED -> MaterialTheme.colorScheme.primary
+        OrderedItemStatus.NOT_USED -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    val status = when (order.status) {
+        OrderedItemStatus.USED -> "Използвана"
+        OrderedItemStatus.NOT_USED -> "Неизползвана"
+        OrderedItemStatus.PENDING_PAYMENT -> "Чака плащане"
+        OrderedItemStatus.REFUNDED -> "Възстановена"
+        OrderedItemStatus.UNKNOWN -> "Неизвестен"
+    }
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        text = status,
+        style = MaterialTheme.typography.labelSmall,
+        color = statusColor,
+        fontWeight = FontWeight.Bold
+    )
+}
+
+@Composable
+private fun ModifiedAtRow(order: OrderedItemResponse) {
+    order.statusUpdatedAt?.let {
+        Text(
+            fontSize = 10.sp,
+            text = "Обновенa на: ${formatScannerTakenAt(order.statusUpdatedAt)}",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+private fun previewSampleOrders(): List<OrderedItemResponse> {
+    val child1 = OrderChildrenResponse(
+        id = 1L,
+        firstName = "Иван",
+        lastName = "Петров",
+        grade = 5,
+        className = "А"
+    )
+    val child2 = OrderChildrenResponse(
+        id = 2L,
+        firstName = "Мария",
+        lastName = "Георгиева",
+        grade = 7,
+        className = "Б"
+    )
+    return listOf(
+        OrderedItemResponse(
+            orderedItemId = 101L,
+            forDate = "2026-03-20",
+            statusUpdatedAt = "2026-03-19T12:34:56",
+            menuName = "Меню А",
+            status = OrderedItemStatus.NOT_USED,
+            childrenResponse = child1
+        ),
+        OrderedItemResponse(
+            orderedItemId = 102L,
+            forDate = "2026-03-20",
+            statusUpdatedAt = "2026-03-19T12:34:56",
+            menuName = "Меню Б",
+            status = OrderedItemStatus.USED,
+            childrenResponse = child2
+        ),
+        OrderedItemResponse(
+            orderedItemId = 103L,
+            forDate = "2026-03-20",
+            statusUpdatedAt = "2026-03-19T12:34:56",
+            menuName = null,
+            status = OrderedItemStatus.PENDING_PAYMENT,
+            childrenResponse = child1
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AllOrdersContentPreview() {
+    EuroposScannerTheme {
+        AllOrdersContent(
+            state = AllOrdersState(
+                orders = previewSampleOrders(),
+                isLoading = false,
+                currentPage = 0,
+                totalPages = 1,
+                totalElements = 42L
+            ),
+            onIntent = {},
+            onBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AllOrdersContentLoadingPreview() {
+    EuroposScannerTheme {
+        AllOrdersContent(
+            state = AllOrdersState(
+                orders = emptyList(),
+                isLoading = true,
+                totalElements = 0L
+            ),
+            onIntent = {},
+            onBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AllOrdersContentFiltersPreview() {
+    EuroposScannerTheme {
+        AllOrdersContent(
+            state = AllOrdersState(
+                orders = previewSampleOrders(),
+                isLoading = false,
+                totalElements = 3L,
+                filterName = "Иван",
+                filterGrade = "5",
+                filterClassName = "А"
+            ),
+            onIntent = {},
+            onBack = {},
+            initialShowFilters = true
+        )
     }
 }

@@ -13,6 +13,8 @@ fun formatScannerTakenAt(iso: String?): String? {
         "${ldt.hour.toString().padStart(2, '0')}:${ldt.minute.toString().padStart(2, '0')}"
     val date = ldt.date
     val dateStr =
-        "${date.day.toString().padStart(2, '0')}.${(date.month.ordinal + 1).toString().padStart(2, '0')}.${date.year}"
-    return "Взет в $timeStr\nна $dateStr"
+        "${date.day.toString().padStart(2, '0')}.${
+            (date.month.ordinal + 1).toString().padStart(2, '0')
+        }.${date.year}"
+    return "$dateStr г. в $timeStr ч."
 }

@@ -31,8 +31,20 @@ class LoginViewModel(
 
     fun onIntent(intent: LoginIntent) {
         when (intent) {
-            is LoginIntent.UpdateUsername -> _state.update { it.copy(username = intent.username, error = null) }
-            is LoginIntent.UpdatePassword -> _state.update { it.copy(password = intent.password, error = null) }
+            is LoginIntent.UpdateUsername -> _state.update {
+                it.copy(
+                    username = intent.username,
+                    error = null
+                )
+            }
+
+            is LoginIntent.UpdatePassword -> _state.update {
+                it.copy(
+                    password = intent.password,
+                    error = null
+                )
+            }
+
             is LoginIntent.Login -> login()
             is LoginIntent.DismissError -> _state.update { it.copy(error = null) }
             is LoginIntent.ToggleRememberUsername -> _state.update { it.copy(rememberUsername = !it.rememberUsername) }
@@ -61,12 +73,18 @@ class LoginViewModel(
                 },
                 onFailure = { e ->
                     val message = when (e) {
-                        is ApiException -> e.message
-                        else -> "Грешка при свързване със сървъра"
+                        is ApiException -> getLoginErrorMessage(e)
+                        else -> "Грешка при свързване, моля опитайте отново"
                     }
                     _state.update { it.copy(isLoading = false, error = message) }
                 }
             )
         }
     }
+
+    private fun getLoginErrorMessage(apiException: ApiException): String =
+        when (apiException.code) {
+            "WRONG_CREDENTIALS" -> "Невалидно потребителско име или парола"
+            else -> "Грешка при свързване, моля опитайте отново"
+        }
 }
