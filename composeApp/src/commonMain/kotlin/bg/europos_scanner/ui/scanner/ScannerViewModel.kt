@@ -72,8 +72,8 @@ class ScannerViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoadingOrders = true) }
             val result = orderRepository.getOrders(
-                from = "2026-03-20",
-                to = "2026-03-20",
+                from = null,
+                to = null,
                 status = "USED",
                 childrenId = null,
                 name = null,

@@ -52,8 +52,8 @@ class AllOrdersViewModel(
             val s = _state.value
             val gradeInt = s.filterGrade.toIntOrNull()
             val result = orderRepository.getOrders(
-                from = "2026-03-20",
-                to = "2026-03-20",
+                from = null,
+                to = null,
                 status = s.filterStatus.ifBlank { null },
                 childrenId = null,
                 name = s.filterName.ifBlank { null },
