@@ -1,6 +1,6 @@
 package bg.europos_scanner.ui.components
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,12 +10,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import bg.europos_scanner.data.model.Student
@@ -24,35 +25,61 @@ import bg.europos_scanner.ui.theme.EuroposScannerTheme
 @Composable
 fun StudentList(
     students: List<Student>,
-    scannedIds: Set<Int>,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
         items(students, key = { it.id }) { student ->
-            val isScanned = student.id in scannedIds
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Card {
-                    Box(
-                        modifier = Modifier.padding( 8.dp).fillMaxWidth()
+                Card(colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.background)) {
+                    Column(
+                        modifier = Modifier.padding(12.dp).fillMaxWidth()
                     ) {
-                        Text(
-                            text = student.fullName,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if (isScanned)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
+                        ChildrenRow(student)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        IdRow(student)
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ChildrenRow(student: Student) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = student.fullName,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        val info = buildString {
+            append("${student.grade}${student.className} клас")
+        }
+        if (info.isNotEmpty()) {
+            Text(
+                text = info,
+                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun IdRow(student: Student) {
+    Text(
+        text = "Код: ${student.id}",
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
 
 @Preview
@@ -90,7 +117,6 @@ private fun StudentListPreview() {
                     className = "А"
                 ),
             ),
-            scannedIds = setOf(1, 3),
             modifier = Modifier.height(300.dp)
         )
     }

@@ -90,7 +90,6 @@ fun StudentsScreen(
                 } else {
                     StudentList(
                         students = state.students,
-                        scannedIds = emptySet(),
                         modifier = Modifier.fillMaxSize()
                     )
                 }
